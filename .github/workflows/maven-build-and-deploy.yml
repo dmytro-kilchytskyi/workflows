@@ -1,0 +1,29 @@
+name: build and deploy
+
+on:
+  workflow_call:
+    inputs:
+      container-name:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+      - name: maven build
+        run: mvn -B package --file pom.xml
+      - name: docker login
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: docker build and push
+        run: docker build --platform linux/arm64 -t dkilchytskyi/${{ inputs.container-name }} --push .
+      - name: ping n8n redeploy webhook
+        run: curl --location --request POST 'https://n8n.cloudstats.org/webhook/edfc8a0a-8f05-48ce-8736-999a94104075' --header ${{ secrets.N8N_REDEPLOY_WEBHOOK_AUTH_HEADER }}
