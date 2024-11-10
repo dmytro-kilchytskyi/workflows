@@ -1,0 +1,20 @@
+name: docker build and push
+
+inputs:
+  container-name:
+    required: true
+    type: string
+
+runs:
+  using: 'composite'
+  steps:
+    - name: docker login
+      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: docker build and push
+      run: |
+        docker build --platform linux/arm64 -t dkilchytskyi/${{ inputs.container-name }} .
+        docker push dkilchytskyi/${{ inputs.container-name }}
+
+    - name: ping n8n redeploy webhook
+      run: curl --location --request POST 'https://n8n.cloudstats.org/webhook/edfc8a0a-8f05-48ce-8736-999a94104075?containerName=${{ inputs.container-name }}' --header ${{ secrets.N8N_REDEPLOY_WEBHOOK_AUTH_HEADER }}

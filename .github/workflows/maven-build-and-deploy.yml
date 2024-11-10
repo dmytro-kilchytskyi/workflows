@@ -22,7 +22,6 @@ jobs:
       - name: maven build
         run: mvn -B package --file pom.xml
       - name: docker build and push
-        uses: ./.github/workflows/docker-build-and-push.yml
+        uses: ./.github/actions/docker-build-and-push
         with:
-          container-name: inputs.container-name
-#        secrets: inherit
+          container-name: ${{ inputs.container-name }}
