@@ -25,4 +25,4 @@ jobs:
         uses: ./.github/workflows/docker-build-and-push.yml
         with:
           container-name: inputs.container-name
-        secrets: inherit
+#        secrets: inherit
